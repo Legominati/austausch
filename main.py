@@ -129,7 +129,7 @@ while True:
         devOld = line_sensor.reflection() - mittelwert
         devNew = line_sensor.reflection() - mittelwert
         
-        while a in range(1000):
+        while a in range(500):
             a=a+1
             summe=summe+devNew
             if a%2==True:
