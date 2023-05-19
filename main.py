@@ -118,9 +118,9 @@ while True:
         ev3.speaker.play_file(sound.LEFT)
         ev3.light.on(Color.ORANGE) 
 
-        driveSpeed = -100
-        p = 0.7   # P-Regler
-        d = 3    # D-Regler, soll das Taumeln dämpfen (weniger zucken)
+        driveSpeed = -150
+        p = 0.6   # P-Regler
+        d = 4    # D-Regler, soll das Taumeln dämpfen (weniger zucken)
         i = 0.02  # I-Regler, soll die Kurvenfahrt verbessern
 
         # Start following the line endlessly.
@@ -129,7 +129,7 @@ while True:
         devOld = line_sensor.reflection() - mittelwert
         devNew = line_sensor.reflection() - mittelwert
         
-        while a in range(500):
+        while a in range(1000):
             a=a+1
             summe=summe+devNew
             if a%2==True:
