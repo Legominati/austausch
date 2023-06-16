@@ -9,7 +9,9 @@ from pybricks.media.ev3dev import SoundFile, ImageFile
 from legominati import Legominati
 
 
+
 ev3 = EV3Brick()
+driveSpeed = -100
 
 minati=Legominati
 sound=SoundFile()
@@ -19,13 +21,10 @@ import time
 left_motor=Motor(Port.B)
 right_motor=Motor(Port.C)
 gyro1=GyroSensor(Port.S2,Direction.CLOCKWISE)
-gyro2=GyroSensor(Port.S3,Direction.CLOCKWISE)
+#gyro2=GyroSensor(Port.S3,Direction.CLOCKWISE)
 
 line_sensor = ColorSensor(Port.S4)
 # Calculate the light threshold. Choose values based on your measurements.
-BLACK = 8
-WHITE = 90
-mittelwert= (BLACK + WHITE) / 2
 
 minati.test_method
 
@@ -116,12 +115,40 @@ while True:
         ev3.screen.clear()
         ev3.screen.draw_text(5,10,"Button left pressed") 
         ev3.speaker.play_file(sound.LEFT)
-        ev3.light.on(Color.ORANGE) 
+        ev3.light.on(Color.ORANGE)
+        
+        file1 = open("data.txt", "w")
+        
+        # bestimme weiss und schwarz-Wertr
+        weiss=50
+        schwarz=50
+        t=0
 
-        driveSpeed = -150
-        p = 0.6   # P-Regler
-        d = 4    # D-Regler, soll das Taumeln dämpfen (weniger zucken)
-        i = 0.02  # I-Regler, soll die Kurvenfahrt verbessern
+        for t in range(60):
+            if(line_sensor.reflection()>weiss):
+                weiss=line_sensor.reflection()
+            if(line_sensor.reflection()<schwarz):
+                schwarz=line_sensor.reflection()
+            robo.turn(1)
+        
+        
+        ausw="Weisswert: "+ str(weiss)
+        auss="Schwarzwert: "+ str(schwarz)
+        while line_sensor.reflection()>1.2*schwarz:
+            robo.turn(-1)
+
+    
+
+        print(ausw)
+        print(auss)
+        mittelwert=(weiss+schwarz)/2
+            
+
+
+        
+        p = 0.5  # P-Regler
+        d = -0.5    # D-Regler, soll das Taumeln dämpfen (weniger zucken)
+        i = 0.03  # I-Regler, soll die Kurvenfahrt verbessern
 
         # Start following the line endlessly.
         a=0
@@ -129,10 +156,10 @@ while True:
         devOld = line_sensor.reflection() - mittelwert
         devNew = line_sensor.reflection() - mittelwert
         
-        while a in range(1000):
+        while a in range(700):
             a=a+1
             summe=summe+devNew
-            if a%2==True:
+            if a%5==True:
                 devOld=line_sensor.reflection() - mittelwert
             
             # Calculate the deviation from the threshold.
@@ -140,20 +167,28 @@ while True:
 
             aus="devNew: "+ str(devNew)       
             aus1= "devOld: " + str(devOld)
-            aus2="summe: "+str(summe)
+            aus3="summe: "+str(summe)
             print(aus)
             print(aus1)
-            print(aus2)
+            #print(aus2)
             
-
+            
          # Calculate the turn rate.
-            turn_rate = p*devNew-d*(devOld-devNew)+ i*summe  
-
+            turn_rate = p*devNew+d*(devOld-devNew)+ i*summe
+          
+            aus2 = "turn_Rate: "+str(turn_rate)
+            print(aus2)
+            print(aus3)
+            print("next")
             # Set the drive base speed and turn rate.
+            L = [aus,aus1, aus2, aus3]
+            file1.write(str(summe)+"\n") 
             
             
             robo.drive(driveSpeed, turn_rate)
-        robo.stop()    
+            wait(1)
+        robo.stop() 
+        file1.close()   
     # You can wait for a short time or do other things in this loop.
     #wait(10)
 
