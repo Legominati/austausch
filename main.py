@@ -11,7 +11,7 @@ from legominati import Legominati
 
 
 ev3 = EV3Brick()
-driveSpeed = -100
+
 
 minati=Legominati
 sound=SoundFile()
@@ -21,7 +21,7 @@ import time
 left_motor=Motor(Port.B)
 right_motor=Motor(Port.C)
 gyro1=GyroSensor(Port.S2,Direction.CLOCKWISE)
-#gyro2=GyroSensor(Port.S3,Direction.CLOCKWISE)
+gyro2=GyroSensor(Port.S3,Direction.CLOCKWISE)
 
 line_sensor = ColorSensor(Port.S4)
 # Calculate the light threshold. Choose values based on your measurements.
@@ -29,7 +29,7 @@ line_sensor = ColorSensor(Port.S4)
 minati.test_method
 
 robo=DriveBase(left_motor,right_motor,62.4,100)
-robo.settings(500,500,500,500)
+robo.settings(1000,1000,500,500)
 
 # Write your program here.
 ev3.light.off()
@@ -46,7 +46,7 @@ time.sleep(0.11)
 
 def resetGyros(winkel):
     gyro1.reset_angle(winkel)
-    gyro2.reset_angle(winkel)
+   # gyro2.reset_angle(winkel)
 
 
 def meanGyro():
@@ -156,10 +156,10 @@ while True:
         devOld = line_sensor.reflection() - mittelwert
         devNew = line_sensor.reflection() - mittelwert
         
-        while a in range(700):
+        while a in range(450):
             a=a+1
             summe=summe+devNew
-            if a%5==True:
+            if a%4==True:
                 devOld=line_sensor.reflection() - mittelwert
             
             # Calculate the deviation from the threshold.
@@ -182,7 +182,7 @@ while True:
             print("next")
             # Set the drive base speed and turn rate.
             L = [aus,aus1, aus2, aus3]
-            file1.write(str(summe)+"\n") 
+            file1.write(str(a)+";"+str(summe)+";"+str(devNew)+";"+str(devOld)+";"+str(turn_rate)+"\n") 
             
             
             robo.drive(driveSpeed, turn_rate)
@@ -204,14 +204,17 @@ while True:
         ev3.screen.clear()
         ev3.screen.draw_text(5,10,"Button center")  
         ev3.speaker.play_file(sound.EV3) 
+        i=0
+    
+        robo.straight(-525)
+        
+        robo.stop()
+        left_motor.hold()
+        right_motor.hold()
+        wait(500)
+        robo.straight(525)
 
-        for i in range(40):
-            straightPid(150,300)
-            robo.stop()
-            left_motor.hold()
-            right_motor.hold()
-
-            turnPid(90)
+        #robo.turn(90)
         
        # time.sleep(1)
     elif Button.DOWN in ev3.buttons.pressed():
